@@ -25,6 +25,14 @@ function App() {
       const res = await fetchMessages();
       if (res.success && Array.isArray(res.data)) {
         setMessages(res.data);
+        res.data.forEach((msg) => {
+          if (
+            msg.sender.toLowerCase() !== currentUser.toLowerCase() &&
+            (!msg.readBy || !msg.readBy.some((u) => u.toLowerCase() === currentUser.toLowerCase()))
+          ) {
+            socket.emit('message:read', { messageId: msg._id, username: currentUser });
+          }
+        });
       }
     } catch (err) {
       console.error('Failed to fetch message history:', err);
@@ -48,6 +56,16 @@ function App() {
         if (prev.some((m) => m._id === newMsg._id)) return prev;
         return [...prev, newMsg];
       });
+
+      if (newMsg.sender.toLowerCase() !== currentUser.toLowerCase()) {
+        socket.emit('message:read', { messageId: newMsg._id, username: currentUser });
+      }
+    };
+
+    const onReadUpdate = ({ messageId, readBy }) => {
+      setMessages((prev) =>
+        prev.map((msg) => (msg._id === messageId ? { ...msg, readBy } : msg))
+      );
     };
 
     const onOnlineUsers = (users) => {
@@ -66,6 +84,7 @@ function App() {
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('message:new', onNewMessage);
+    socket.on('message:read_update', onReadUpdate);
     socket.on('user:online', onOnlineUsers);
     socket.on('typing:start', onTypingStart);
     socket.on('typing:stop', onTypingStop);
@@ -74,6 +93,7 @@ function App() {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
       socket.off('message:new', onNewMessage);
+      socket.off('message:read_update', onReadUpdate);
       socket.off('user:online', onOnlineUsers);
       socket.off('typing:start', onTypingStart);
       socket.off('typing:stop', onTypingStop);

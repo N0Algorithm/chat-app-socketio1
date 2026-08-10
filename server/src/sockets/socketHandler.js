@@ -39,6 +39,23 @@ const initializeSocket = (server, clientUrl) => {
       }
     });
 
+    socket.on('message:read', async ({ messageId, username }) => {
+      if (!messageId || !username) return;
+      try {
+        const Message = require('../models/Message');
+        const updatedMsg = await Message.findByIdAndUpdate(
+          messageId,
+          { $addToSet: { readBy: username } },
+          { new: true }
+        );
+        if (updatedMsg) {
+          io.emit('message:read_update', { messageId: updatedMsg._id, readBy: updatedMsg.readBy });
+        }
+      } catch (err) {
+        console.error('Error updating read status:', err.message);
+      }
+    });
+
     socket.on('disconnect', () => {
       const user = onlineUsers.get(socket.id);
       if (user) {

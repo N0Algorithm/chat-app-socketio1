@@ -8,6 +8,7 @@ A clean, full-stack real-time chat application built with **React**, **Node.js**
 
 - **Instant Messaging**: Real-time message broadcasting using Socket.IO.
 - **Chat History**: Past messages are saved in MongoDB and loaded automatically when you join.
+- **Read & Delivered Status**: Single check mark (`✓`) when delivered, double check mark (`✓✓`) when read by other users in real time.
 - **Online Counter & Status**: Displays who is currently online in the chat room.
 - **Typing Indicators**: Shows live updates when another user is typing.
 - **Clear Chat**: Clear room chat history whenever needed.

@@ -15,7 +15,13 @@ const messageSchema = new mongoose.Schema(
       trim: true,
       minlength: [1, 'Message text cannot be empty'],
       maxlength: [1000, 'Message text cannot exceed 1000 characters']
-    }
+    },
+    readBy: [
+      {
+        type: String,
+        trim: true
+      }
+    ]
   },
   {
     timestamps: true
