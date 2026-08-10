@@ -18,7 +18,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -40,7 +40,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -99,7 +99,7 @@ function App() {
       socket.off('typing:stop', onTypingStop);
       disconnectSocket();
     };
-  }, [currentUser]);
+  }, [currentUser, loadHistory]);
 
   const handleJoin = (username) => {
     localStorage.setItem('chat_username', username);
