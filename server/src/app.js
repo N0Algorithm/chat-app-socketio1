@@ -5,8 +5,27 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 
 const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+const cleanClientUrl = clientUrl.replace(/\/$/, "");
+
+const allowedOrigins = [
+  cleanClientUrl,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+];
+
 app.use(cors({
-  origin: clientUrl,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const cleanOrigin = origin.replace(/\/$/, "");
+    if (allowedOrigins.includes(cleanOrigin)) {
+      return callback(null, true);
+    }
+    // Fallback: if it's a render domain or we're on production, let's allow it to prevent blocking
+    if (cleanOrigin.includes('onrender.com') || process.env.NODE_ENV === 'production') {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 

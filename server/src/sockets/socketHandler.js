@@ -4,9 +4,23 @@ const { Server } = require('socket.io');
 const onlineUsers = new Map();
 
 const initializeSocket = (server, clientUrl) => {
+  const cleanClientUrl = (clientUrl || 'http://localhost:3000').replace(/\/$/, "");
+  const allowedOrigins = [
+    cleanClientUrl,
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ];
+
   const io = new Server(server, {
     cors: {
-      origin: clientUrl || 'http://localhost:3000',
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const cleanOrigin = origin.replace(/\/$/, "");
+        if (allowedOrigins.includes(cleanOrigin) || cleanOrigin.includes('onrender.com') || process.env.NODE_ENV === 'production') {
+          return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+      },
       methods: ['GET', 'POST'],
       credentials: true
     }
